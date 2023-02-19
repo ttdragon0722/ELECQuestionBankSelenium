@@ -10,14 +10,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from data import *
 from os import mkdir
 
+
+# terminal display color
 from colorama import Fore, Back, Style
 
+from requests import get
 
 options = Options()
 options.add_argument("--disable-notifications")
 
 chrome = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
 
 #開啟網站
 chrome.get("https://www.block.tw/test/select/1")
@@ -89,28 +91,35 @@ for i in range(30,80):
     except:
         solution = "無解析"
 
-    img = None
+
+    # 抓取圖片
+    img = ""
     try:
-        img = chrome.find_element(By.XPATH,f'//*[@id="question{i}"]/img')
-        img_src = img.get_attribute("src")
-        print('img',img)
-        print(Fore.YELLOW+f"{i} "+img_src+Style.RESET_ALL)
-    except:
-        img = "無圖片"
-        
-    if img == "無圖片":
         try:
+            img = chrome.find_element(By.XPATH,f'//*[@id="question{i}"]/img')
+            img_src = img.get_attribute("src")
+            download = get(img_src)
+            with open(f'questionImg/{i}.svg' ,'w',encoding='utf-8') as f:
+                f.write((download.content).decode('UTF-8'))
+
+            img = f"questionImg/{i}.svg"
+
+            print(Fore.YELLOW+f"{i} img "+img_src+Style.RESET_ALL)
+        except Exception as e:
             img = question.find_element(By.TAG_NAME,"svg")
             svg_code = img.get_attribute('outerHTML')
             svg_code = svg_code[:5] + ' encoding="utf-8" ' + svg_code[5:]
             with open(f"questionImg/{i}.svg","w",encoding='utf8') as f:
                 f.write(svg_code)
-        except:
-            img = "無圖片"
-    print(i,img)
-    # img = "無圖片"
+            print(Fore.YELLOW+f"{i} svg"+Style.RESET_ALL)
 
-    addQuestion(questionText,answer,solution,"",option1,option2,option3,option4,True)
+            img = f"questionImg/{i}.svg"
+
+    except:
+        img = ""
+        
+
+    addQuestion(questionText,answer,solution,img,option1,option2,option3,option4,True)
     print(f"第{i}題已加入資料庫\n")
 
 time.sleep(15)
