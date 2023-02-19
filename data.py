@@ -9,3 +9,12 @@ def addQuestion(question:str, answer:str, details:str,img:str,option1:str,option
     db.commit()
     db.close()
     return rows
+
+def deleteAllData():
+    db = sqlite3.connect('questionBank.db')
+    cur = db.cursor()
+    cur.execute(f"DELETE FROM question;")
+    rows = cur.fetchall()
+    db.commit()
+    db.close()
+    return rows

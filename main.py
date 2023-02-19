@@ -8,7 +8,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from data import *
+
+# 路徑相關
 from os import mkdir
+from shutil import rmtree
 
 
 # terminal display color
@@ -16,9 +19,15 @@ from colorama import Fore, Back, Style
 
 from requests import get
 
+
+
+# init
+rmtree('questionImg')
+mkdir('questionImg')
+deleteAllData()
+
 options = Options()
 options.add_argument("--disable-notifications")
-
 chrome = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 #開啟網站
@@ -50,7 +59,7 @@ chrome.execute_script("send_question()")
 #變更每頁顯示所有題目(因為題目數量為474題，所以每頁顯示474題)
 chrome.execute_script("change_display(474)")
 #因為有474題 所以用一個迴圈去跑474次 偵測每題的題目、選項、解析
-for i in range(30,80):
+for i in range(1,475):
     question = chrome.find_element(By.ID,"question"+str(i))
     questionText = question.find_element(By.TAG_NAME,"font").text
     #偵測四個選項中哪個是正確答案
@@ -105,7 +114,7 @@ for i in range(30,80):
             img = f"questionImg/{i}.svg"
 
             print(Fore.YELLOW+f"{i} img "+img_src+Style.RESET_ALL)
-        except Exception as e:
+        except:
             img = question.find_element(By.TAG_NAME,"svg")
             svg_code = img.get_attribute('outerHTML')
             svg_code = svg_code[:5] + ' encoding="utf-8" ' + svg_code[5:]
